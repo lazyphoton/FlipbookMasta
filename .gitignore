@@ -1,6 +1,4 @@
-/flipbook_4096.png
-/flipbook_texture_4k.png
-/input_images
-/test.png
-/T_Flipbook_Title.png
 /__pycache__
+/venv
+/build
+/dist

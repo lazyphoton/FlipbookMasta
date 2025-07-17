@@ -46,5 +46,5 @@ def create_flipbook(
         else:
             final_name = f"{base_name}{layout_suffix}_{tex_index:02}{ext}"
 
-        canvas.save(final_name)
+        canvas.save(final_name, optimize=True)
         print(f"Saved {len(frame_chunk)} frames to {final_name}")
