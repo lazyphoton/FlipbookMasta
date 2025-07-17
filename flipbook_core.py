@@ -5,9 +5,9 @@ from PIL import Image
 def create_flipbook(
     input_folder,
     output_file,
-    grid_size=16,
-    canvas_size=2048,
-    force_square=True
+    grid_cols=16,
+    grid_rows=16,
+    canvas_size=4096
 ):
     image_files = sorted([
         f for f in os.listdir(input_folder)
@@ -15,9 +15,14 @@ def create_flipbook(
     ])
 
     total_frames = len(image_files)
-    max_per_texture = grid_size * grid_size
+    max_per_texture = grid_cols * grid_rows
     num_textures = math.ceil(total_frames / max_per_texture)
-    cell_size = canvas_size // grid_size
+
+    cell_width = canvas_size // grid_cols
+    cell_height = canvas_size // grid_rows
+
+    base_name, ext = os.path.splitext(output_file)
+    layout_suffix = f"_{grid_cols}x{grid_rows}"
 
     for tex_index in range(num_textures):
         canvas = Image.new('RGBA', (canvas_size, canvas_size), (0, 0, 0, 0))
@@ -28,18 +33,18 @@ def create_flipbook(
 
         for idx, filename in enumerate(frame_chunk):
             img = Image.open(os.path.join(input_folder, filename)).convert('RGBA')
-            if force_square:
-                img = img.resize((cell_size, cell_size), Image.BILINEAR)
-            else:
-                img.thumbnail((cell_size, cell_size), Image.BILINEAR)
+            img = img.resize((cell_width, cell_height), Image.BILINEAR)
 
-            row = idx // grid_size
-            col = idx % grid_size
-            x = col * cell_size
-            y = row * cell_size
+            row = idx // grid_cols
+            col = idx % grid_cols
+            x = col * cell_width
+            y = row * cell_height
             canvas.paste(img, (x, y))
 
-        base, ext = os.path.splitext(output_file)
-        indexed_output = f"{base}_{tex_index:02}{ext}"
-        canvas.save(indexed_output)
-        print(f"Saved {len(frame_chunk)} frames to {indexed_output}")
+        if num_textures == 1:
+            final_name = f"{base_name}{layout_suffix}{ext}"
+        else:
+            final_name = f"{base_name}{layout_suffix}_{tex_index:02}{ext}"
+
+        canvas.save(final_name)
+        print(f"Saved {len(frame_chunk)} frames to {final_name}")
